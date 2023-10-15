@@ -15,14 +15,14 @@ It uses port 3001 upon start.
 
 Endpoints
 
-| Method | Path                   | Description    | Protected |
-| ------ | ---------------------- | -------------- | --------- |
-| GET    | /ping                  | health check   | no        |
-| GET    | /.well-known/jwks.json | get public key | no        |
-| POST   | /api/register          | register user  | no        |
-| POST   | /api/login             | login user     | no        |
-| POST   | /api/refresh           | refresh token  | no        |
-| POST   | /api/logout            | logout user    | no        |
+| Method | Path                   | Description                                                                    | Protected |
+| ------ | ---------------------- | ------------------------------------------------------------------------------ | --------- |
+| GET    | /ping                  | [health check](https://github.com/tayapro/notes-id/tree/main#health-check)     | no        |
+| GET    | /.well-known/jwks.json | [get public key](https://github.com/tayapro/notes-id/tree/main#get-public-key) | no        |
+| POST   | /api/register          | [register user](https://github.com/tayapro/notes-id/tree/main#register-user)   | no        |
+| POST   | /api/login             | [login user](https://github.com/tayapro/notes-id/tree/main#login-user)         | no        |
+| POST   | /api/refresh           | [refresh token](https://github.com/tayapro/notes-id/tree/main#refresh-token)   | no        |
+| POST   | /api/logout            | [logout user](https://github.com/tayapro/notes-id/tree/main#logout-user)       | no        |
 
 ## Health check
 
