@@ -96,7 +96,7 @@ Content-Type: application/json
 Example request
 
 ```http
-POST /api/register HTTP/1.1
+POST /api/login HTTP/1.1
 Content-Type: application/json
 
 {
