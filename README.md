@@ -161,3 +161,13 @@ Example response
 ```http
 HTTP/1.1 200 OK
 ```
+
+# CHANGELOG
+
+## v0.0.1-alpha
+
+-   [x] No changes, compatibility tag
+
+# Known issues
+
+-   [ ] Certificate is not rotating
