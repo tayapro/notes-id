@@ -1,4 +1,5 @@
-mongoose = require('mongoose')
+// mongoose = require('mongoose')
+import mongoose from 'mongoose'
 
 const schema = new mongoose.Schema({
     username: {
@@ -16,4 +17,4 @@ const User = mongoose.model('users', schema)
 //Note: https://www.mongodb.com/community/forums/t/atlas-enforcing-uniqueness-when-it-shouldnt/123824/2
 //Have to restart application (rs) when collection or DB are removed
 User.syncIndexes()
-module.exports = User
+export default User

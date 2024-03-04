@@ -171,6 +171,7 @@ HTTP/1.1 200 OK
 ## v0.0.2-alpha
 
 -   [x] APIs which do not have any content in response should return HTTP 204 upon success
+-   [x] Migrate to `ES6` modules
 
 # Known issues
 
