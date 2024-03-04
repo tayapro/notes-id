@@ -39,4 +39,4 @@ const jwks = {
     ],
 }
 
-module.exports = { keypairPem, jwks }
+export default { keypairPem, jwks }

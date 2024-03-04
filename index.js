@@ -1,12 +1,12 @@
-const express = require('express')
-const mongoose = require('mongoose')
-const cors = require('cors')
-const jwt = require('jsonwebtoken')
-const jwktopem = require('jwk-to-pem')
-const morgan = require('morgan')
-require('dotenv').config()
-const keys = require('./keys.js')
-const User = require('./models/user.js')
+import express from 'express'
+import mongoose from 'mongoose'
+import cors from 'cors'
+import jwt from 'jsonwebtoken'
+import jwktopem from 'jwk-to-pem'
+import morgan from 'morgan'
+import 'dotenv/config'
+import keys from './keys.js'
+import User from './models/user.js'
 
 const port = 3001
 const app = express()
@@ -108,7 +108,7 @@ app.post('/api/refresh', function (req, res) {
 })
 
 app.post('/api/logout', function (req, res) {
-    res.status(200).send()
+    res.status(204).send()
 })
 
 function issueTokens(username, userID) {
