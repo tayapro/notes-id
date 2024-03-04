@@ -108,7 +108,7 @@ app.post('/api/refresh', function (req, res) {
 })
 
 app.post('/api/logout', function (req, res) {
-    res.status(200).send()
+    res.status(204).send()
 })
 
 function issueTokens(username, userID) {

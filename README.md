@@ -168,6 +168,11 @@ HTTP/1.1 200 OK
 
 -   [x] No changes, compatibility tag
 
+## v0.0.2-alpha
+
+-   [x] APIs which do not have any content in response should return HTTP 204 upon success
+
 # Known issues
 
 -   [ ] Certificate is not rotating
+-   [ ] Currently register returns tokens the same as login
