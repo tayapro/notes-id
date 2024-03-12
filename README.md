@@ -173,6 +173,11 @@ HTTP/1.1 200 OK
 -   [x] APIs which do not have any content in response should return HTTP 204 upon success
 -   [x] Migrate to `ES6` modules
 
+## v0.0.3-alpha
+
+-   [x] Fix vulnerabilities and deprecation warnings
+-   [x] Review dependencies in package.json
+
 # Known issues
 
 -   [ ] Certificate is not rotating
