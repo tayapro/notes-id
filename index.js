@@ -2,7 +2,7 @@ import express from 'express'
 import mongoose from 'mongoose'
 import cors from 'cors'
 import jwt from 'jsonwebtoken'
-import jwktopem from 'jwk-to-pem'
+import jwkToPem from 'jwk-to-pem'
 import morgan from 'morgan'
 import 'dotenv/config'
 import keys from './keys.js'
@@ -34,7 +34,7 @@ app.listen(port, function () {
 })
 
 app.get('/.well-known/jwks.json', function (req, res) {
-    res.status(200).json(keys.jwks)
+    res.status(200).json(keys.getPublicJWKS())
 })
 
 app.get('/ping', async function (req, res) {
@@ -118,11 +118,11 @@ function issueTokens(username, userID) {
             user_id: userID,
             token_use: 'access',
         },
-        keys.keypairPem,
+        keys.getKeyPairPem(),
         {
             algorithm: 'RS256',
             expiresIn: '60m',
-            keyid: keys.jwks.keys[0].kid,
+            keyid: keys.getPublicJWKS().keys[0].kid,
         }
     )
 
@@ -132,11 +132,11 @@ function issueTokens(username, userID) {
             user_id: userID,
             token_use: 'refresh',
         },
-        keys.keypairPem,
+        keys.getKeyPairPem(),
         {
             algorithm: 'RS256',
             expiresIn: '30d',
-            keyid: keys.jwks.keys[0].kid,
+            keyid: keys.getPublicJWKS().keys[0].kid,
         }
     )
 
@@ -147,7 +147,21 @@ function issueTokens(username, userID) {
 }
 
 function verifyToken(token) {
-    const key = jwktopem(keys.jwks.keys[0])
-    const decoded_token = jwt.verify(token, key)
+    const kid = jwt.decode(token, { complete: true }).header.kid
+    const setKeys = keys.getPublicJWKS().keys
+
+    let keyJWK = null
+    for (let i = 0; i < setKeys.length; i++) {
+        if (kid === setKeys[i].kid) {
+            keyJWK = setKeys[i]
+        }
+    }
+
+    if (keyJWK === null) {
+        throw new Error('Oooops')
+    }
+
+    const keyPEM = jwkToPem(keyJWK)
+    const decoded_token = jwt.verify(token, keyPEM)
     return decoded_token
 }

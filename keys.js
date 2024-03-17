@@ -39,4 +39,15 @@ const jwks = {
     ],
 }
 
-export default { keypairPem, jwks }
+function getKeyPairPem() {
+    return keypairPem
+}
+
+function getPublicJWKS() {
+    return jwks
+}
+
+export default {
+    getKeyPairPem,
+    getPublicJWKS,
+}
