@@ -5,8 +5,11 @@ import jwt from 'jsonwebtoken'
 import jwkToPem from 'jwk-to-pem'
 import morgan from 'morgan'
 import 'dotenv/config'
-import keys from './keys.js'
 import User from './models/user.js'
+import keysGen from './keys/generate.js'
+import keyStore from './keys/store.js'
+import rotateKey from './keys/rotate.js'
+import keys from './keys/keys.js'
 
 const port = 3001
 const app = express()
@@ -25,16 +28,20 @@ app.use(
 // to log requests
 app.use(morgan('combined'))
 
-mongoose.connect(process.env.MONGO_URL).catch(function (err) {
+await mongoose.connect(process.env.MONGO_URL).catch(function (err) {
     console.log(err)
 })
+
+//TODO: env variable schedule
+await rotateKey.startRotationJob('* * * * *')
 
 app.listen(port, function () {
     console.log(`...Server started on port ${port}...`)
 })
 
-app.get('/.well-known/jwks.json', function (req, res) {
-    res.status(200).json(keys.getPublicJWKS())
+app.get('/.well-known/jwks.json', async function (req, res) {
+    const publicKey = await keys.getPublicJWKS()
+    res.status(200).json(publicKey)
 })
 
 app.get('/ping', async function (req, res) {
@@ -51,7 +58,7 @@ app.post('/api/register', async function (req, res) {
         })
         const { id } = await user.save()
 
-        const tokens = issueTokens(username, id)
+        const tokens = await issueTokens(username, id)
         return res.status(200).json({
             username: username,
             user_id: id,
@@ -72,7 +79,7 @@ app.post('/api/login', async function (req, res) {
         if (!user || user.password !== password) {
             return res.status(400).send()
         }
-        const tokens = issueTokens(username, user.id)
+        const tokens = await issueTokens(username, user.id)
         return res.status(200).json({
             username: user.username,
             user_id: user.id,
@@ -85,13 +92,13 @@ app.post('/api/login', async function (req, res) {
     }
 })
 
-app.post('/api/refresh', function (req, res) {
+app.post('/api/refresh', async function (req, res) {
     try {
-        const decoded_token = verifyToken(req.body.refreshToken)
+        const decoded_token = await verifyToken(req.body.refreshToken)
         if (decoded_token.token_use !== 'refresh') {
             throw new Error('Bad token use')
         }
-        const tokens = issueTokens(
+        const tokens = await issueTokens(
             decoded_token.username,
             decoded_token.user_id
         )
@@ -111,18 +118,21 @@ app.post('/api/logout', function (req, res) {
     res.status(204).send()
 })
 
-function issueTokens(username, userID) {
+async function issueTokens(username, userID) {
+    const publicKey = await keys.getPublicJWKS()
+    const privateKey = await keys.getKeyPairPem()
+
     const access_token = jwt.sign(
         {
             username: username,
             user_id: userID,
             token_use: 'access',
         },
-        keys.getKeyPairPem(),
+        privateKey,
         {
             algorithm: 'RS256',
             expiresIn: '60m',
-            keyid: keys.getPublicJWKS().keys[0].kid,
+            keyid: publicKey.keys[0].kid,
         }
     )
 
@@ -132,11 +142,11 @@ function issueTokens(username, userID) {
             user_id: userID,
             token_use: 'refresh',
         },
-        keys.getKeyPairPem(),
+        privateKey,
         {
             algorithm: 'RS256',
             expiresIn: '30d',
-            keyid: keys.getPublicJWKS().keys[0].kid,
+            keyid: publicKey.keys[0].kid,
         }
     )
 
@@ -146,9 +156,9 @@ function issueTokens(username, userID) {
     }
 }
 
-function verifyToken(token) {
+async function verifyToken(token) {
     const kid = jwt.decode(token, { complete: true }).header.kid
-    const setKeys = keys.getPublicJWKS().keys
+    const setKeys = (await keys.getPublicJWKS()).keys
 
     let keyJWK = null
     for (let i = 0; i < setKeys.length; i++) {
