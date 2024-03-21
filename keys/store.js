@@ -1,11 +1,11 @@
 import mongoose from 'mongoose'
 
 const schema = new mongoose.Schema({
-    private: {
+    privateKey: {
         type: String,
         required: true,
     },
-    public: {
+    publicKey: {
         type: String,
         required: true,
     },
@@ -22,8 +22,9 @@ const schema = new mongoose.Schema({
 })
 
 const Key = mongoose.model('keys', schema)
-//Key.syncIndexes()
 
+// This function read publicKey and privateKey from DB
+// and return privateKey as PEM string and publicKey as JWKS object
 async function readKeys() {
     const keys = await Key.findOne({ type: 'keypair' })
     if (!keys) {
@@ -31,12 +32,14 @@ async function readKeys() {
     }
 
     return {
-        private: keys.private,
-        public: JSON.parse(keys.public),
+        privateKey: keys.privateKey,
+        publicKey: JSON.parse(keys.publicKey),
         lastUpdate: keys.lastUpdate,
     }
 }
 
+// This function takes privateKey as a PEM string and
+// public key as JWKS object and stores it in DB
 async function writeKeys(privateKey, publicKey) {
     let key = await Key.findOne({ type: 'keypair' })
 
@@ -47,13 +50,12 @@ async function writeKeys(privateKey, publicKey) {
     }
 
     key.lastUpdate = Date.now()
-    key.private = privateKey
-    key.public = JSON.stringify(publicKey)
+    key.privateKey = privateKey
+    key.publicKey = JSON.stringify(publicKey)
     await key.save()
 }
 
 export { writeKeys, readKeys }
-
 export default {
     writeKeys,
     readKeys,

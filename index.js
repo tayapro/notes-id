@@ -6,12 +6,12 @@ import jwkToPem from 'jwk-to-pem'
 import morgan from 'morgan'
 import 'dotenv/config'
 import User from './models/user.js'
-import keysGen from './keys/generate.js'
-import keyStore from './keys/store.js'
 import rotateKey from './keys/rotate.js'
-import keys from './keys/keys.js'
+import keyStore from './keys/store.js'
 
 const port = 3001
+const keyRotationSchedule = process.env.KEY_ROTATION_SCHEDULE || '0 0 1 * *'
+
 const app = express()
 //in order to parse POST JSON
 app.use(express.json())
@@ -28,19 +28,18 @@ app.use(
 // to log requests
 app.use(morgan('combined'))
 
-await mongoose.connect(process.env.MONGO_URL).catch(function (err) {
-    console.log(err)
+await mongoose.connect(process.env.MONGO_URL).catch(function (e) {
+    console.error('ERROR :::', e)
 })
 
-//TODO: env variable schedule
-await rotateKey.startRotationJob('* * * * *')
+await rotateKey.startRotationJob(keyRotationSchedule)
 
 app.listen(port, function () {
     console.log(`...Server started on port ${port}...`)
 })
 
 app.get('/.well-known/jwks.json', async function (req, res) {
-    const publicKey = await keys.getPublicJWKS()
+    const { publicKey } = await keyStore.readKeys()
     res.status(200).json(publicKey)
 })
 
@@ -119,8 +118,7 @@ app.post('/api/logout', function (req, res) {
 })
 
 async function issueTokens(username, userID) {
-    const publicKey = await keys.getPublicJWKS()
-    const privateKey = await keys.getKeyPairPem()
+    const { privateKey, publicKey } = await keyStore.readKeys()
 
     const access_token = jwt.sign(
         {
@@ -158,7 +156,8 @@ async function issueTokens(username, userID) {
 
 async function verifyToken(token) {
     const kid = jwt.decode(token, { complete: true }).header.kid
-    const setKeys = (await keys.getPublicJWKS()).keys
+    const { publicKey } = await keyStore.readKeys()
+    const setKeys = publicKey.keys
 
     let keyJWK = null
     for (let i = 0; i < setKeys.length; i++) {

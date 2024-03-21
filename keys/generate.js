@@ -29,8 +29,8 @@ function generateKeys(keyLength) {
     }
 
     return {
-        privateKeyPem: privateKey,
-        jwks,
+        privateKey,
+        publicKey: jwks,
     }
 }
 

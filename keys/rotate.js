@@ -3,13 +3,15 @@ import cron from 'node-cron'
 import { generateKeys } from './generate.js'
 import { writeKeys, readKeys } from './store.js'
 
+const keyLength = parseInt(process.env.KEY_LENGTH) || 4096
+
 async function startRotationJob(cronSchedule) {
     let currentKeys = null
     try {
         currentKeys = await readKeys()
     } catch (e) {
-        const key = generateKeys(2048)
-        await writeKeys(key.privateKeyPem, key.jwks)
+        const key = generateKeys(keyLength)
+        await writeKeys(key.privateKey, key.publicKey)
         return startRotationJob(cronSchedule)
     }
 
@@ -21,7 +23,7 @@ async function startRotationJob(cronSchedule) {
         console.log('Rotating keys on start...', new Date())
         rotateKeys()
     }
-    console.log('Wait: ', wait, new Date())
+
     cron.schedule(cronSchedule, async function () {
         console.log('Rotating keys on schedule...', new Date())
         rotateKeys()
@@ -31,19 +33,17 @@ async function startRotationJob(cronSchedule) {
 async function rotateKeys() {
     const currentKeys = await readKeys()
 
-    const newKey = generateKeys(2048)
+    const newKey = generateKeys(keyLength)
 
-    // Preserve public keys history
-    newKey.jwks.keys = newKey.jwks.keys
-        .concat(currentKeys.public.keys)
+    // Preserve public keys history and limit keys numbers by two
+    newKey.publicKey.keys = newKey.publicKey.keys
+        .concat(currentKeys.publicKey.keys)
         .slice(0, 2)
-    console.log(newKey.jwks.keys)
 
-    await writeKeys(newKey.privateKeyPem, newKey.jwks)
+    await writeKeys(newKey.privateKey, newKey.publicKey)
 
     return newKey
 }
 
 export { startRotationJob }
-
 export default { startRotationJob }
