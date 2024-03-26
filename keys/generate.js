@@ -1,4 +1,4 @@
-import { generateKeyPairSync, createHash } from 'crypto'
+import { generateKeyPairSync, createHash } from 'node:crypto'
 import { pem2jwk } from 'pem-jwk'
 
 function getKid(publicKey) {
