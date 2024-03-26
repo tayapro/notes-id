@@ -6,10 +6,12 @@ WORKDIR /app
 
 # Copy required files to the image
 COPY index.js .
-COPY keys.js .
 COPY package-lock.json .
 COPY package.json .
 COPY models/user.js ./models/user.js 
+COPY keys/generate.js ./keys/generate.js
+COPY keys/rotate.js ./keys/rotate.js
+COPY keys/store.js ./keys/store.js
 
 # run npm command, which looks for package-lock.json and install all deps from where
 # as result directory node_modules will be created
