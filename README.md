@@ -178,7 +178,9 @@ HTTP/1.1 200 OK
 -   [x] Fix vulnerabilities and deprecation warnings
 -   [x] Review dependencies in package.json
 
-# Known issues
+## v0.0.4-alpha
 
--   [ ] Certificate is not rotating
--   [ ] Currently register returns tokens the same as login
+-   [x] Add functions that going to get private PEM key and public JWKS
+-   [x] Find proper key by key ID for token verification
+-   [x] Ignore dev dependencies in Dockerfile
+-   [x] Rotate certificates

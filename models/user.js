@@ -1,4 +1,3 @@
-// mongoose = require('mongoose')
 import mongoose from 'mongoose'
 
 const schema = new mongoose.Schema({
